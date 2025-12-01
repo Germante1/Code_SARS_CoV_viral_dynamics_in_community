@@ -1,0 +1,70 @@
+<DATAFILE>
+
+[FILEINFO]
+file='../data/obs_S1_1_positive.csv'
+delimiter = comma
+header={ID, Ntest, ID_test, Time, traj, obs, Diff_Ct, censor, tSS, infected, Tag_tinf}
+
+[CONTENT]
+ID = {use=identifier}
+tSS = {use=regressor}
+Time = {use=time}
+Diff_Ct = {use=observation, type=continuous}
+censor = {use=censored}
+
+[SETTINGS]
+dataType = {'Diff_Ct'=plasma}
+
+<MODEL>
+
+[INDIVIDUAL]
+input = {Tc_pop, omega_Tc, Ti_pop, omega_Ti, Tp_pop, omega_Tp, Vp_pop, omega_Vp}
+
+DEFINITION:
+Tc = {distribution=logNormal, typical=Tc_pop, sd=omega_Tc}
+Ti = {distribution=logNormal, typical=Ti_pop, sd=omega_Ti}
+Tp = {distribution=logNormal, typical=Tp_pop, sd=omega_Tp}
+Vp = {distribution=logNormal, typical=Vp_pop, sd=omega_Vp}
+
+[LONGITUDINAL]
+input = {a}
+
+file = '../Structural_model/Structural_model_Monolix.txt'
+
+DEFINITION:
+Diff_Ct = {distribution=normal, prediction=Ct, errorModel=constant(a)}
+
+<FIT>
+data = 'Diff_Ct'
+model = Diff_Ct
+
+<PARAMETER>
+Tc_pop = {value=15, method=MLE}
+Ti_pop = {value=5, method=MLE}
+Tp_pop = {value=6, method=MLE}
+Vp_pop = {value=25, method=MLE}
+a = {value=2, method=MLE}
+omega_Tc = {value=1, method=MLE}
+omega_Ti = {value=1, method=MLE}
+omega_Tp = {value=1, method=MLE}
+omega_Vp = {value=1, method=MLE}
+
+<MONOLIX>
+
+[TASKS]
+populationParameters()
+individualParameters(method = {conditionalMean, conditionalMode })
+fim(method = Linearization)
+logLikelihood(method = Linearization)
+plotResult(method = {indfits, parameterdistribution, covariancemodeldiagnosis, covariatemodeldiagnosis, obspred, vpc, residualsscatter, residualsdistribution, randomeffects, saemresults })
+
+[SETTINGS]
+GLOBAL:
+exportpath = 'Monolix_Scenario1_1'
+nbchains = 5
+autochains = no
+
+POPULATION:
+exploratoryiterations = 800
+simulatedannealingiterations = 800
+

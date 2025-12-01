@@ -1,0 +1,27 @@
+[LONGITUDINAL]
+input = {Tg, Tc, Ti, Vp, tSS}
+
+tSS = {use = regressor}
+
+EQUATION:
+lod = 10
+Vinf = 0
+tinf = tSS-Ti
+timep = tinf+Tg
+timec = timep+Tc
+
+if (t >= tinf) & (t <= timep)
+	Ct = Vp*(t-tinf)/Tg
+
+elseif (t< tinf)
+	Ct = 0
+
+else
+	Ct = Vp+(lod-Vp)*(t-timep)/Tc
+
+
+end
+
+OUTPUT: 
+output = {Ct}
+
